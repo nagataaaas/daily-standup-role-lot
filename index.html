@@ -22,16 +22,6 @@
             max-width: 360px;
         }
         
-        .seed-badge {
-            font-size: 10px;
-            color: #a0a0a0;
-            margin-bottom: 8px;
-        }
-        
-        .seed-badge.error {
-            color: #eb5757;
-        }
-        
         .members {
             display: flex;
             flex-wrap: wrap;
@@ -108,8 +98,6 @@
 </head>
 <body>
     <div class="container">
-        <div class="seed-badge" id="seedBadge"></div>
-        
         <div class="members" id="members"></div>
         
         <div class="roles" id="roles">
@@ -162,33 +150,8 @@
         let roles = [];
         
         function getRandomSeed() {
-            const badge = document.getElementById('seedBadge');
-            let seed;
-            console.log(document)
-            console.log(document.referrer)
-            
-            try {
-                if (document.referrer) {
-                    const referrerParts = document.referrer.split('/');
-                    const lastPart = referrerParts[referrerParts.length - 1];
-                    
-                    if (lastPart && lastPart.length > 0) {
-                        seed = lastPart.split('?')[0];
-                        badge.textContent = `seed: ${seed.substring(0, 8)}...`;
-                    } else {
-                        throw new Error('No valid ID');
-                    }
-                } else {
-                    throw new Error('No referrer');
-                }
-            } catch (error) {
-                seed = new Date().toISOString().split('T')[0];
-                badge.classList.add('error');
-                badge.textContent = `⚠️ failed to fetch random seed (referrer: '${document.referrer}', using: ${seed})`;
-                return seed;
-            }
-            
-            return seed;
+            // Use current date as seed
+            return new Date().toISOString().split('T')[0];
         }
         
         function getMembersFromURL() {
