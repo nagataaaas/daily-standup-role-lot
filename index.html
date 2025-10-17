@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Standup Role Selector</title>
+    <title>Standup Roles</title>
     <style>
         * {
             margin: 0;
@@ -13,186 +13,119 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans JP', sans-serif;
-            background: #ffffff;
-            padding: 24px;
+            background: transparent;
+            padding: 12px;
             color: #37352f;
-            line-height: 1.6;
         }
         
         .container {
-            max-width: 500px;
-            margin: 0 auto;
+            max-width: 360px;
         }
         
-        h1 {
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #37352f;
-        }
-        
-        .seed-info {
-            background: #f7f6f3;
-            padding: 12px 16px;
-            border-radius: 4px;
-            margin-bottom: 24px;
-            font-size: 13px;
-            color: #787774;
-        }
-        
-        .seed-info.error {
-            background: #fef0f0;
-            color: #eb5757;
-        }
-        
-        .members-section {
-            margin-bottom: 32px;
-        }
-        
-        .section-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #787774;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 12px;
-        }
-        
-        .member-list {
-            background: #ffffff;
-            border: 1px solid #e9e9e7;
-            border-radius: 4px;
-            padding: 8px;
-        }
-        
-        .member-item {
-            display: flex;
-            align-items: center;
-            padding: 10px 12px;
-            border-radius: 4px;
-            transition: background 0.2s ease;
-        }
-        
-        .member-item:hover {
-            background: #f7f6f3;
-        }
-        
-        .member-checkbox {
-            width: 18px;
-            height: 18px;
-            margin-right: 12px;
-            cursor: pointer;
-            accent-color: #2383e2;
-        }
-        
-        .member-name {
-            font-size: 15px;
-            color: #37352f;
-        }
-        
-        .roles-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 8px;
-            padding: 24px;
-            color: white;
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.25);
-        }
-        
-        .role-card {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            border-radius: 6px;
-            padding: 16px;
-            margin-bottom: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .role-card:last-child {
-            margin-bottom: 0;
-        }
-        
-        .role-label {
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            opacity: 0.9;
+        .seed-badge {
+            font-size: 10px;
+            color: #a0a0a0;
             margin-bottom: 8px;
         }
         
-        .role-name {
-            font-size: 20px;
-            font-weight: 600;
-            min-height: 30px;
-            display: flex;
-            align-items: center;
+        .seed-badge.error {
+            color: #eb5757;
         }
         
-        .empty-state {
-            opacity: 0.7;
-            font-style: italic;
+        .members {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        
+        .member {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            background: #f7f6f3;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        
+        .member input {
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+        }
+        
+        .member.unchecked {
+            opacity: 0.4;
+        }
+        
+        .roles {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .role {
+            flex: 1;
+            background: #ffffff;
+            border: 1px solid #e9e9e7;
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+        }
+        
+        .role-label {
+            font-size: 10px;
+            color: #787774;
+            margin-bottom: 4px;
+        }
+        
+        .role-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #37352f;
+            min-height: 20px;
+        }
+        
+        .empty {
+            color: #c0c0c0;
+            font-weight: 400;
         }
         
         .no-members {
             text-align: center;
-            padding: 40px;
-            color: #787774;
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .role-name.updated {
-            animation: fadeIn 0.3s ease;
+            padding: 20px;
+            color: #a0a0a0;
+            font-size: 12px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📊 Daily Standup Roles</h1>
+        <div class="seed-badge" id="seedBadge"></div>
         
-        <div class="seed-info" id="seedInfo">
-            Loading seed...
-        </div>
+        <div class="members" id="members"></div>
         
-        <div class="members-section" id="membersSection">
-            <div class="section-title">Team Members</div>
-            <div class="member-list" id="memberList">
-                <!-- Members will be dynamically added here -->
-            </div>
-        </div>
-        
-        <div class="roles-section" id="rolesSection">
-            <div class="role-card">
+        <div class="roles" id="roles">
+            <div class="role">
                 <div class="role-label">ファシリ</div>
                 <div class="role-name" id="facilitator">
-                    <span class="empty-state">—</span>
+                    <span class="empty">—</span>
                 </div>
             </div>
-            <div class="role-card">
+            <div class="role">
                 <div class="role-label">書記</div>
                 <div class="role-name" id="secretary">
-                    <span class="empty-state">—</span>
+                    <span class="empty">—</span>
                 </div>
             </div>
         </div>
         
         <div class="no-members" id="noMembers" style="display: none;">
-            <p>No members found.</p>
-            <p style="font-size: 12px; margin-top: 8px;">Add members using URL parameter: ?members=name1,name2,name3</p>
+            Add members: ?members=name1,name2,name3
         </div>
     </div>
 
     <script>
-        // Seeded random number generator
         class SeededRandom {
             constructor(seed) {
                 this.seed = this.hashString(seed);
@@ -203,7 +136,7 @@
                 for (let i = 0; i < str.length; i++) {
                     const char = str.charCodeAt(i);
                     hash = ((hash << 5) - hash) + char;
-                    hash = hash & hash; // Convert to 32bit integer
+                    hash = hash & hash;
                 }
                 return Math.abs(hash);
             }
@@ -226,11 +159,9 @@
         let seededRandom;
         let members = [];
         
-        // Get random seed
         function getRandomSeed() {
-            const seedInfo = document.getElementById('seedInfo');
+            const badge = document.getElementById('seedBadge');
             let seed;
-            let seedSource;
             
             try {
                 if (document.referrer) {
@@ -238,27 +169,24 @@
                     const lastPart = referrerParts[referrerParts.length - 1];
                     
                     if (lastPart && lastPart.length > 0) {
-                        seed = lastPart.split('?')[0]; // Remove query parameters if any
-                        seedSource = 'Notion Page ID';
+                        seed = lastPart.split('?')[0];
+                        badge.textContent = `seed: ${seed.substring(0, 8)}...`;
                     } else {
-                        throw new Error('No valid ID in referrer');
+                        throw new Error('No valid ID');
                     }
                 } else {
-                    throw new Error('No referrer found');
+                    throw new Error('No referrer');
                 }
             } catch (error) {
-                seed = new Date().toISOString().split('T')[0]; // Use current date
-                seedSource = 'Current Date';
-                seedInfo.classList.add('error');
-                seedInfo.innerHTML = `⚠️ Failed to fetch random seed<br>Using: ${seed}`;
+                seed = new Date().toISOString().split('T')[0];
+                badge.classList.add('error');
+                badge.textContent = `⚠️ failed to fetch random seed (using: ${seed})`;
                 return seed;
             }
             
-            seedInfo.innerHTML = `🎲 Random Seed (${seedSource}): <strong>${seed}</strong>`;
             return seed;
         }
         
-        // Get members from URL query
         function getMembersFromURL() {
             const urlParams = new URLSearchParams(window.location.search);
             const membersParam = urlParams.get('members');
@@ -269,52 +197,47 @@
             return [];
         }
         
-        // Create member checkboxes
         function createMemberList() {
-            const memberList = document.getElementById('memberList');
-            const membersSection = document.getElementById('membersSection');
-            const rolesSection = document.getElementById('rolesSection');
+            const membersEl = document.getElementById('members');
+            const rolesEl = document.getElementById('roles');
             const noMembers = document.getElementById('noMembers');
             
             if (members.length === 0) {
-                membersSection.style.display = 'none';
-                rolesSection.style.display = 'none';
+                membersEl.style.display = 'none';
+                rolesEl.style.display = 'none';
                 noMembers.style.display = 'block';
                 return;
             }
             
-            memberList.innerHTML = '';
+            membersEl.innerHTML = '';
             members.forEach((member, index) => {
-                const memberItem = document.createElement('div');
-                memberItem.className = 'member-item';
+                const memberEl = document.createElement('label');
+                memberEl.className = 'member';
                 
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
-                checkbox.id = `member-${index}`;
-                checkbox.className = 'member-checkbox';
                 checkbox.checked = true;
-                checkbox.addEventListener('change', selectRoles);
+                checkbox.addEventListener('change', (e) => {
+                    memberEl.classList.toggle('unchecked', !e.target.checked);
+                    selectRoles();
+                });
                 
-                const label = document.createElement('label');
-                label.htmlFor = `member-${index}`;
-                label.className = 'member-name';
-                label.textContent = member;
-                label.style.cursor = 'pointer';
+                const nameEl = document.createElement('span');
+                nameEl.textContent = member;
                 
-                memberItem.appendChild(checkbox);
-                memberItem.appendChild(label);
-                memberList.appendChild(memberItem);
+                memberEl.appendChild(checkbox);
+                memberEl.appendChild(nameEl);
+                membersEl.appendChild(memberEl);
             });
         }
         
-        // Select roles randomly
         function selectRoles() {
-            const checkboxes = document.querySelectorAll('.member-checkbox:checked');
+            const checkboxes = document.querySelectorAll('.member input:checked');
             const presentMembers = [];
             
-            checkboxes.forEach((checkbox, index) => {
-                const memberIndex = parseInt(checkbox.id.split('-')[1]);
-                presentMembers.push(members[memberIndex]);
+            checkboxes.forEach((checkbox) => {
+                const memberName = checkbox.parentElement.querySelector('span').textContent;
+                presentMembers.push(memberName);
             });
             
             const facilitatorEl = document.getElementById('facilitator');
@@ -322,34 +245,20 @@
             
             if (presentMembers.length >= 2) {
                 const shuffled = seededRandom.shuffle(presentMembers);
-                
                 facilitatorEl.innerHTML = shuffled[0];
-                facilitatorEl.classList.add('updated');
-                
+                facilitatorEl.className = 'role-name';
                 secretaryEl.innerHTML = shuffled[1];
-                secretaryEl.classList.add('updated');
-                
-                // Remove animation class after animation completes
-                setTimeout(() => {
-                    facilitatorEl.classList.remove('updated');
-                    secretaryEl.classList.remove('updated');
-                }, 300);
+                secretaryEl.className = 'role-name';
             } else if (presentMembers.length === 1) {
                 facilitatorEl.innerHTML = presentMembers[0];
-                facilitatorEl.classList.add('updated');
-                
-                secretaryEl.innerHTML = '<span class="empty-state">Not enough members</span>';
-                
-                setTimeout(() => {
-                    facilitatorEl.classList.remove('updated');
-                }, 300);
+                facilitatorEl.className = 'role-name';
+                secretaryEl.innerHTML = '<span class="empty">—</span>';
             } else {
-                facilitatorEl.innerHTML = '<span class="empty-state">—</span>';
-                secretaryEl.innerHTML = '<span class="empty-state">—</span>';
+                facilitatorEl.innerHTML = '<span class="empty">—</span>';
+                secretaryEl.innerHTML = '<span class="empty">—</span>';
             }
         }
         
-        // Initialize
         function init() {
             const seed = getRandomSeed();
             seededRandom = new SeededRandom(seed);
@@ -362,7 +271,6 @@
             }
         }
         
-        // Run on page load
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
