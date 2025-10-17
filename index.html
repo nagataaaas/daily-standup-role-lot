@@ -184,7 +184,7 @@
             } catch (error) {
                 seed = new Date().toISOString().split('T')[0];
                 badge.classList.add('error');
-                badge.textContent = `⚠️ failed to fetch random seed (using: ${seed})`;
+                badge.textContent = `⚠️ failed to fetch random seed (referrer: '${document.referrer}', using: ${seed})`;
                 return seed;
             }
             
