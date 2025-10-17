@@ -97,6 +97,13 @@
             color: #a0a0a0;
             font-size: 12px;
         }
+        
+        .help-text {
+            font-size: 10px;
+            color: #a0a0a0;
+            margin-top: 8px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -106,22 +113,16 @@
         <div class="members" id="members"></div>
         
         <div class="roles" id="roles">
-            <div class="role">
-                <div class="role-label">ファシリ</div>
-                <div class="role-name" id="facilitator">
-                    <span class="empty">—</span>
-                </div>
-            </div>
-            <div class="role">
-                <div class="role-label">書記</div>
-                <div class="role-name" id="secretary">
-                    <span class="empty">—</span>
-                </div>
-            </div>
+            <!-- Roles will be dynamically generated -->
+        </div>
+        
+        <div class="help-text">
+            urlを編集でメンバー・役割変更
         </div>
         
         <div class="no-members" id="noMembers" style="display: none;">
-            Add members: ?members=name1,name2,name3
+            Add members: ?members=name1,name2,name3<br>
+            Add roles: ?roles=role1,role2
         </div>
     </div>
 
@@ -158,6 +159,7 @@
 
         let seededRandom;
         let members = [];
+        let roles = [];
         
         function getRandomSeed() {
             const badge = document.getElementById('seedBadge');
@@ -197,14 +199,50 @@
             return [];
         }
         
+        function getRolesFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const rolesParam = urlParams.get('roles');
+            
+            if (rolesParam) {
+                return rolesParam.split(',').map(role => role.trim()).filter(role => role.length > 0);
+            }
+            // Default roles
+            return ['ファシリ', '書記'];
+        }
+        
+        function createRoleBoxes() {
+            const rolesEl = document.getElementById('roles');
+            rolesEl.innerHTML = '';
+            
+            roles.forEach((role, index) => {
+                const roleBox = document.createElement('div');
+                roleBox.className = 'role';
+                
+                const roleLabel = document.createElement('div');
+                roleLabel.className = 'role-label';
+                roleLabel.textContent = role;
+                
+                const roleName = document.createElement('div');
+                roleName.className = 'role-name';
+                roleName.id = `role-${index}`;
+                roleName.innerHTML = '<span class="empty">—</span>';
+                
+                roleBox.appendChild(roleLabel);
+                roleBox.appendChild(roleName);
+                rolesEl.appendChild(roleBox);
+            });
+        }
+        
         function createMemberList() {
             const membersEl = document.getElementById('members');
             const rolesEl = document.getElementById('roles');
             const noMembers = document.getElementById('noMembers');
+            const helpText = document.querySelector('.help-text');
             
             if (members.length === 0) {
                 membersEl.style.display = 'none';
                 rolesEl.style.display = 'none';
+                helpText.style.display = 'none';
                 noMembers.style.display = 'block';
                 return;
             }
@@ -240,22 +278,30 @@
                 presentMembers.push(memberName);
             });
             
-            const facilitatorEl = document.getElementById('facilitator');
-            const secretaryEl = document.getElementById('secretary');
+            // Clear all role assignments
+            roles.forEach((role, index) => {
+                const roleEl = document.getElementById(`role-${index}`);
+                roleEl.innerHTML = '<span class="empty">—</span>';
+            });
             
-            if (presentMembers.length >= 2) {
+            // Assign roles if we have enough members
+            if (presentMembers.length >= roles.length) {
                 const shuffled = seededRandom.shuffle(presentMembers);
-                facilitatorEl.innerHTML = shuffled[0];
-                facilitatorEl.className = 'role-name';
-                secretaryEl.innerHTML = shuffled[1];
-                secretaryEl.className = 'role-name';
-            } else if (presentMembers.length === 1) {
-                facilitatorEl.innerHTML = presentMembers[0];
-                facilitatorEl.className = 'role-name';
-                secretaryEl.innerHTML = '<span class="empty">—</span>';
-            } else {
-                facilitatorEl.innerHTML = '<span class="empty">—</span>';
-                secretaryEl.innerHTML = '<span class="empty">—</span>';
+                roles.forEach((role, index) => {
+                    const roleEl = document.getElementById(`role-${index}`);
+                    roleEl.innerHTML = shuffled[index];
+                    roleEl.className = 'role-name';
+                });
+            } else if (presentMembers.length > 0) {
+                // Assign as many roles as we have members
+                const shuffled = seededRandom.shuffle(presentMembers);
+                shuffled.forEach((member, index) => {
+                    if (index < roles.length) {
+                        const roleEl = document.getElementById(`role-${index}`);
+                        roleEl.innerHTML = member;
+                        roleEl.className = 'role-name';
+                    }
+                });
             }
         }
         
@@ -264,9 +310,12 @@
             seededRandom = new SeededRandom(seed);
             
             members = getMembersFromURL();
+            roles = getRolesFromURL();
+            
+            createRoleBoxes();
             createMemberList();
             
-            if (members.length >= 2) {
+            if (members.length > 0) {
                 selectRoles();
             }
         }
